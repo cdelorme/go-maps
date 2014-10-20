@@ -3,8 +3,6 @@ package maps
 import (
 	"errors"
 	"strconv"
-
-	// "fmt"
 )
 
 func Merge(maps ...*map[string]interface{}) map[string]interface{} {
@@ -57,6 +55,14 @@ func String(search *map[string]interface{}, fallback string, keys ...string) (st
 			return strconv.FormatBool(t), nil
 		case int:
 			return strconv.FormatInt(int64(t), 10), nil
+		case int8:
+			return strconv.FormatInt(int64(t), 10), nil
+		case int32:
+			return strconv.FormatInt(int64(t), 10), nil
+		case int64:
+			return strconv.FormatInt(t, 10), nil
+		case float32:
+			return strconv.FormatFloat(float64(t), 'f', -1, 64), nil
 		case float64:
 			return strconv.FormatFloat(t, 'f', -1, 64), nil
 		}
