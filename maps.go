@@ -3,6 +3,8 @@ package maps
 import (
 	"errors"
 	"strconv"
+
+	// "fmt"
 )
 
 func Merge(maps ...*map[string]interface{}) map[string]interface{} {
@@ -15,8 +17,14 @@ func Merge(maps ...*map[string]interface{}) map[string]interface{} {
 	return m
 }
 
-func Bool(search *map[string]interface{}, fallback bool, key string) (bool, error) {
-	if data, exists := (*search)[key]; exists {
+func Bool(search *map[string]interface{}, fallback bool, keys ...string) (bool, error) {
+	if len(keys) == 0 {
+		return fallback, errors.New("No keys supplied")
+	}
+	if data, exists := (*search)[keys[0]]; exists {
+		if m, ok := data.(map[string]interface{}); ok {
+			return Bool(&m, fallback, keys[1:]...)
+		}
 		if b, ok := data.(bool); ok {
 			return b, nil
 		}
@@ -31,21 +39,43 @@ func Bool(search *map[string]interface{}, fallback bool, key string) (bool, erro
 	return fallback, errors.New("Unable to find data by supplied key(s)")
 }
 
-func String(search *map[string]interface{}, fallback string, key string) (string, error) {
-	if data, exists := (*search)[key]; exists {
+func String(search *map[string]interface{}, fallback string, keys ...string) (string, error) {
+	if len(keys) == 0 {
+		return fallback, errors.New("No keys supplied")
+	}
+	if data, exists := (*search)[keys[0]]; exists {
+		if m, ok := data.(map[string]interface{}); ok {
+			return String(&m, fallback, keys[1:]...)
+		}
 		if s, ok := data.(string); ok {
 			return s, nil
-		} else {
-			return fallback, errors.New("Unable to assert string type")
+		}
+		switch t := data.(type) {
+		default:
+			return fallback, errors.New("Unable to cast data to string")
+		case bool:
+			return strconv.FormatBool(t), nil
+		case int:
+			return strconv.FormatInt(int64(t), 10), nil
+		case float64:
+			return strconv.FormatFloat(t, 'f', -1, 64), nil
 		}
 	}
 	return fallback, errors.New("Unable to find data by supplied key(s)")
 }
 
-func Int(search *map[string]interface{}, fallback int64, key string) (int64, error) {
-	if data, exists := (*search)[key]; exists {
+func Int(search *map[string]interface{}, fallback int64, keys ...string) (int64, error) {
+	if len(keys) == 0 {
+		return fallback, errors.New("No keys supplied")
+	}
+	if data, exists := (*search)[keys[0]]; exists {
+		if m, ok := data.(map[string]interface{}); ok {
+			return Int(&m, fallback, keys[1:]...)
+		}
 		if i, ok := data.(int64); ok {
 			return i, nil
+		} else if i, ok := data.(int); ok {
+			return int64(i), nil
 		}
 		if s, ok := data.(string); ok {
 			i, err := strconv.ParseInt(s, 10, 64)
@@ -58,9 +88,17 @@ func Int(search *map[string]interface{}, fallback int64, key string) (int64, err
 	return fallback, errors.New("Unable to find data by supplied key(s)")
 }
 
-func Float(search *map[string]interface{}, fallback float64, key string) (float64, error) {
-	if data, exists := (*search)[key]; exists {
-		if f, ok := data.(float64); ok {
+func Float(search *map[string]interface{}, fallback float64, keys ...string) (float64, error) {
+	if len(keys) == 0 {
+		return fallback, errors.New("No keys supplied")
+	}
+	if data, exists := (*search)[keys[0]]; exists {
+		if m, ok := data.(map[string]interface{}); ok {
+			return Float(&m, fallback, keys[1:]...)
+		}
+		if f, ok := data.(float32); ok {
+			return float64(f), nil
+		} else if f, ok := data.(float64); ok {
 			return f, nil
 		}
 		if s, ok := data.(string); ok {
