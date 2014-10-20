@@ -9,6 +9,13 @@ func Merge(maps ...*map[string]interface{}) map[string]interface{} {
 	m := make(map[string]interface{})
 	for _, t := range maps {
 		for k, v := range *t {
+			if _, me := m[k]; me {
+				if m1, ok := m[k].(map[string]interface{}); ok {
+					if m2, is := v.(map[string]interface{}); is {
+						v = Merge(&m1, &m2)
+					}
+				}
+			}
 			m[k] = v
 		}
 	}

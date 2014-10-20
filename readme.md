@@ -18,11 +18,11 @@ Merge example:
     m1["key"] = "value"
     m2["key"] = "value2"
 
-    m1 = maps.Merge(m1, m2)
+    m1 = maps.Merge(&m1, &m2)
 
     m1["key"] == "value2"
 
-_Allows you to merge same results defering priority to the later maps.  Will also combine any data giving you all that exists in both._
+_Allows you to merge same results defering priority to the later maps.  Will also combine any data giving you all that exists in both.  Merge also supports depth for embedded `map[string]interface{}` content._
 
 Casting example:
 
