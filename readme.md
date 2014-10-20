@@ -6,7 +6,7 @@ A golang map data type support library.  It focuses on `map[string]interface` pr
 
 ## sales pitch
 
-This library offers basic casting to four common data types (`bool`, `string`, `int`, and `float32`), as well as the option to merge one or more `map[string]interface{}` maps.
+This library offers basic casting to four common data types (`bool`, `string`, `int64`, and `float64`), as well as the option to merge one or more `map[string]interface{}` maps.
 
 
 ## usage
@@ -24,20 +24,10 @@ Merge example:
 
 _Allows you to merge same results defering priority to the later maps.  Will also combine any data giving you all that exists in both._
 
-Casting examples:
-
-    var myBool bool
-    var myString string
-    var myInt int
-    var myFloat float32
+Casting example:
 
     m := make(map[string]interface{})
-
     m["boolExample"] = true
-    m["stringExample"] = "a string"
-    m["intExample"] = 3
-    m["floatExample"] = 1.0
-
     b, err := maps.Bool(&m, false, "boolExample")
     if err != nil {
         // handle error
