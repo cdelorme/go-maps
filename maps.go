@@ -33,13 +33,7 @@ func Bool(search *map[string]interface{}, fallback bool, keys ...string) (bool, 
 		if b, ok := data.(bool); ok {
 			return b, nil
 		}
-		if s, ok := data.(string); ok {
-			b, err := strconv.ParseBool(s)
-			if err != nil {
-				return fallback, err
-			}
-			return b, nil
-		}
+		return true, nil
 	}
 	return fallback, errors.New("Unable to find data by supplied key(s)")
 }
