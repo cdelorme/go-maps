@@ -8,11 +8,11 @@ import (
 func Merge(maps ...map[string]interface{}) map[string]interface{} {
 	m := make(map[string]interface{})
 	for _, t := range maps {
-		for k, v := range *t {
+		for k, v := range t {
 			if _, me := m[k]; me {
 				if m1, ok := m[k].(map[string]interface{}); ok {
 					if m2, is := v.(map[string]interface{}); is {
-						v = Merge(&m1, &m2)
+						v = Merge(m1, m2)
 					}
 				}
 			}
@@ -26,9 +26,9 @@ func Bool(search map[string]interface{}, fallback bool, keys ...string) (bool, e
 	if len(keys) == 0 {
 		return fallback, errors.New("No keys supplied")
 	}
-	if data, exists := (*search)[keys[0]]; exists {
+	if data, exists := search[keys[0]]; exists {
 		if m, ok := data.(map[string]interface{}); ok {
-			return Bool(&m, fallback, keys[1:]...)
+			return Bool(m, fallback, keys[1:]...)
 		}
 		if b, ok := data.(bool); ok {
 			return b, nil
@@ -42,9 +42,9 @@ func String(search map[string]interface{}, fallback string, keys ...string) (str
 	if len(keys) == 0 {
 		return fallback, errors.New("No keys supplied")
 	}
-	if data, exists := (*search)[keys[0]]; exists {
+	if data, exists := search[keys[0]]; exists {
 		if m, ok := data.(map[string]interface{}); ok {
-			return String(&m, fallback, keys[1:]...)
+			return String(m, fallback, keys[1:]...)
 		}
 		if s, ok := data.(string); ok {
 			return s, nil
@@ -75,9 +75,9 @@ func Int(search map[string]interface{}, fallback int64, keys ...string) (int64, 
 	if len(keys) == 0 {
 		return fallback, errors.New("No keys supplied")
 	}
-	if data, exists := (*search)[keys[0]]; exists {
+	if data, exists := search[keys[0]]; exists {
 		if m, ok := data.(map[string]interface{}); ok {
-			return Int(&m, fallback, keys[1:]...)
+			return Int(m, fallback, keys[1:]...)
 		}
 		if i, ok := data.(int64); ok {
 			return i, nil
@@ -99,9 +99,9 @@ func Float(search map[string]interface{}, fallback float64, keys ...string) (flo
 	if len(keys) == 0 {
 		return fallback, errors.New("No keys supplied")
 	}
-	if data, exists := (*search)[keys[0]]; exists {
+	if data, exists := search[keys[0]]; exists {
 		if m, ok := data.(map[string]interface{}); ok {
-			return Float(&m, fallback, keys[1:]...)
+			return Float(m, fallback, keys[1:]...)
 		}
 		if f, ok := data.(float32); ok {
 			return float64(f), nil
