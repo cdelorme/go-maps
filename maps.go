@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func Merge(maps ...*map[string]interface{}) map[string]interface{} {
+func Merge(maps ...map[string]interface{}) map[string]interface{} {
 	m := make(map[string]interface{})
 	for _, t := range maps {
 		for k, v := range *t {
@@ -22,7 +22,7 @@ func Merge(maps ...*map[string]interface{}) map[string]interface{} {
 	return m
 }
 
-func Bool(search *map[string]interface{}, fallback bool, keys ...string) (bool, error) {
+func Bool(search map[string]interface{}, fallback bool, keys ...string) (bool, error) {
 	if len(keys) == 0 {
 		return fallback, errors.New("No keys supplied")
 	}
@@ -38,7 +38,7 @@ func Bool(search *map[string]interface{}, fallback bool, keys ...string) (bool, 
 	return fallback, errors.New("Unable to find data by supplied key(s)")
 }
 
-func String(search *map[string]interface{}, fallback string, keys ...string) (string, error) {
+func String(search map[string]interface{}, fallback string, keys ...string) (string, error) {
 	if len(keys) == 0 {
 		return fallback, errors.New("No keys supplied")
 	}
@@ -71,7 +71,7 @@ func String(search *map[string]interface{}, fallback string, keys ...string) (st
 	return fallback, errors.New("Unable to find data by supplied key(s)")
 }
 
-func Int(search *map[string]interface{}, fallback int64, keys ...string) (int64, error) {
+func Int(search map[string]interface{}, fallback int64, keys ...string) (int64, error) {
 	if len(keys) == 0 {
 		return fallback, errors.New("No keys supplied")
 	}
@@ -95,7 +95,7 @@ func Int(search *map[string]interface{}, fallback int64, keys ...string) (int64,
 	return fallback, errors.New("Unable to find data by supplied key(s)")
 }
 
-func Float(search *map[string]interface{}, fallback float64, keys ...string) (float64, error) {
+func Float(search map[string]interface{}, fallback float64, keys ...string) (float64, error) {
 	if len(keys) == 0 {
 		return fallback, errors.New("No keys supplied")
 	}
