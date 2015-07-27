@@ -51,6 +51,11 @@ Merge example:
 		//this will be true
 	}
 
+Merge and cast into a given struct:
+
+    var data CustomStruct
+    maps.To(&data, config, flags)
+
 Casting example:
 
     m := make(map[string]interface{})
