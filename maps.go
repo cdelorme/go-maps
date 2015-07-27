@@ -23,7 +23,7 @@ func Merge(maps ...map[string]interface{}) map[string]interface{} {
 	return m
 }
 
-func To(obj interface{}, data ...map[string]interface{}) {
+func To(obj *interface{}, data ...map[string]interface{}) {
 	j, _ := json.Marshal(Merge(data...))
 	json.Unmarshal(j, &obj)
 }
