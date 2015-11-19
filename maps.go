@@ -6,6 +6,206 @@ import (
 	"strconv"
 )
 
+var errorNoKeys = errors.New("no key(s) supplied")
+var errorNotFound = errors.New("no index found at supplied key(s)")
+var errorCastFailed = errors.New("failed to cast data to expected type")
+
+func Get(search map[string]interface{}, keys ...string) (interface{}, error) {
+	if len(keys) == 0 {
+		return nil, errorNoKeys
+	} else if _, exists := search[keys[0]]; !exists {
+		return nil, errorNotFound
+	}
+
+	if len(keys) > 1 {
+		if m, ok := search[keys[0]].(map[string]interface{}); ok {
+			return Get(m, keys[1:]...)
+		}
+	}
+	return search[keys[0]], nil
+}
+
+func Bool(search map[string]interface{}, fallback bool, keys ...string) (bool, error) {
+	d, err := Get(search, keys...)
+	if err != nil {
+		return fallback, err
+	}
+
+	switch b := d.(type) {
+	default:
+		return true, nil
+	case bool:
+		return b, nil
+	case int:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case int8:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case int32:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case int64:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case uint:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case uint8:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case uint32:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case uint64:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case float32:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case float64:
+		if b == 0 {
+			return false, nil
+		}
+		return true, nil
+	case string:
+		if len(b) == 0 || b == "false" || b == "0" || b == "null" || b == "undefined" || b == "nil" {
+			return false, nil
+		}
+		return true, nil
+	}
+}
+
+func String(search map[string]interface{}, fallback string, keys ...string) (string, error) {
+	d, err := Get(search, keys...)
+	if err != nil {
+		return fallback, err
+	}
+
+	switch s := d.(type) {
+	default:
+		return fallback, errorCastFailed
+	case string:
+		return s, nil
+	case bool:
+		return strconv.FormatBool(s), nil
+	case int:
+		return strconv.FormatInt(int64(s), 10), nil
+	case int8:
+		return strconv.FormatInt(int64(s), 10), nil
+	case int32:
+		return strconv.FormatInt(int64(s), 10), nil
+	case int64:
+		return strconv.FormatInt(s, 10), nil
+	case uint:
+		return strconv.FormatUint(uint64(s), 10), nil
+	case uint8:
+		return strconv.FormatUint(uint64(s), 10), nil
+	case uint32:
+		return strconv.FormatUint(uint64(s), 10), nil
+	case uint64:
+		return strconv.FormatUint(s, 10), nil
+	case float32:
+		return strconv.FormatFloat(float64(s), 'f', -1, 32), nil
+	case float64:
+		return strconv.FormatFloat(s, 'f', -1, 64), nil
+	}
+}
+
+func Int(search map[string]interface{}, fallback int64, keys ...string) (int64, error) {
+	d, err := Get(search, keys...)
+	if err != nil {
+		return fallback, err
+	}
+
+	switch i := d.(type) {
+	default:
+		return fallback, errorCastFailed
+	case int:
+		return int64(i), nil
+	case int8:
+		return int64(i), nil
+	case int32:
+		return int64(i), nil
+	case int64:
+		return i, nil
+	case uint:
+		return int64(i), nil
+	case uint8:
+		return int64(i), nil
+	case uint32:
+		return int64(i), nil
+	case uint64:
+		return int64(i), nil
+	case float32:
+		return int64(i), nil
+	case float64:
+		return int64(i), nil
+	case string:
+		s, err := strconv.ParseFloat(i, 64)
+		if err != nil {
+			return fallback, errorCastFailed
+		}
+		return int64(s), nil
+	}
+}
+
+func Float(search map[string]interface{}, fallback float64, keys ...string) (float64, error) {
+	d, err := Get(search, keys...)
+	if err != nil {
+		return fallback, err
+	}
+
+	switch f := d.(type) {
+	default:
+		return fallback, errorCastFailed
+	case int:
+		return float64(f), nil
+	case int8:
+		return float64(f), nil
+	case int32:
+		return float64(f), nil
+	case int64:
+		return float64(f), nil
+	case uint:
+		return float64(f), nil
+	case uint8:
+		return float64(f), nil
+	case uint32:
+		return float64(f), nil
+	case uint64:
+		return float64(f), nil
+	case float32:
+		return float64(f), nil
+	case float64:
+		return f, nil
+	case string:
+		s, err := strconv.ParseFloat(f, 64)
+		if err != nil {
+			return fallback, errorCastFailed
+		}
+		return s, nil
+	}
+}
+
 func Merge(maps ...map[string]interface{}) map[string]interface{} {
 	m := make(map[string]interface{})
 	for _, t := range maps {
@@ -26,101 +226,4 @@ func Merge(maps ...map[string]interface{}) map[string]interface{} {
 func To(obj interface{}, data ...map[string]interface{}) {
 	j, _ := json.Marshal(Merge(data...))
 	json.Unmarshal(j, &obj)
-}
-
-func Bool(search map[string]interface{}, fallback bool, keys ...string) (bool, error) {
-	if len(keys) == 0 {
-		return fallback, errors.New("No keys supplied")
-	}
-	if data, exists := search[keys[0]]; exists {
-		if m, ok := data.(map[string]interface{}); ok {
-			return Bool(m, fallback, keys[1:]...)
-		}
-		if b, ok := data.(bool); ok {
-			return b, nil
-		}
-		return true, nil
-	}
-	return fallback, errors.New("Unable to find data by supplied key(s)")
-}
-
-func String(search map[string]interface{}, fallback string, keys ...string) (string, error) {
-	if len(keys) == 0 {
-		return fallback, errors.New("No keys supplied")
-	}
-	if data, exists := search[keys[0]]; exists {
-		if m, ok := data.(map[string]interface{}); ok {
-			return String(m, fallback, keys[1:]...)
-		}
-		if s, ok := data.(string); ok {
-			return s, nil
-		}
-		switch t := data.(type) {
-		default:
-			return fallback, errors.New("Unable to cast data to string")
-		case bool:
-			return strconv.FormatBool(t), nil
-		case int:
-			return strconv.FormatInt(int64(t), 10), nil
-		case int8:
-			return strconv.FormatInt(int64(t), 10), nil
-		case int32:
-			return strconv.FormatInt(int64(t), 10), nil
-		case int64:
-			return strconv.FormatInt(t, 10), nil
-		case float32:
-			return strconv.FormatFloat(float64(t), 'f', -1, 64), nil
-		case float64:
-			return strconv.FormatFloat(t, 'f', -1, 64), nil
-		}
-	}
-	return fallback, errors.New("Unable to find data by supplied key(s)")
-}
-
-func Int(search map[string]interface{}, fallback int64, keys ...string) (int64, error) {
-	if len(keys) == 0 {
-		return fallback, errors.New("No keys supplied")
-	}
-	if data, exists := search[keys[0]]; exists {
-		if m, ok := data.(map[string]interface{}); ok {
-			return Int(m, fallback, keys[1:]...)
-		}
-		if i, ok := data.(int64); ok {
-			return i, nil
-		} else if i, ok := data.(int); ok {
-			return int64(i), nil
-		}
-		if s, ok := data.(string); ok {
-			i, err := strconv.ParseInt(s, 10, 64)
-			if err != nil {
-				return fallback, err
-			}
-			return i, nil
-		}
-	}
-	return fallback, errors.New("Unable to find data by supplied key(s)")
-}
-
-func Float(search map[string]interface{}, fallback float64, keys ...string) (float64, error) {
-	if len(keys) == 0 {
-		return fallback, errors.New("No keys supplied")
-	}
-	if data, exists := search[keys[0]]; exists {
-		if m, ok := data.(map[string]interface{}); ok {
-			return Float(m, fallback, keys[1:]...)
-		}
-		if f, ok := data.(float32); ok {
-			return float64(f), nil
-		} else if f, ok := data.(float64); ok {
-			return f, nil
-		}
-		if s, ok := data.(string); ok {
-			f, err := strconv.ParseFloat(s, 64)
-			if err != nil {
-				return fallback, err
-			}
-			return f, nil
-		}
-	}
-	return fallback, errors.New("Unable to find data by supplied key(s)")
 }

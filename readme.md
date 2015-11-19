@@ -6,25 +6,32 @@ A support library for `map[string]interface{}` to handle deep merging and type c
 
 ## sales pitch
 
-This library offers basic casting to four common data types (`bool`, `string`, `int64`, and `float64`), as well as the option to merge one or more `map[string]interface{}` maps.
+This library offers the following functionality:
 
-The `Merge()` functionality works with deep objects.
+- casting to `bool`
+- casting to `string`
+- casting to `int64`
+- casting to `float64`
+- merging of two or more `map[string]interface` with _map_ friendly deep copying
+- casting to a defined struct leveraging the [`encoding/json`](https://golang.org/pkg/encoding/json/) package
+- simply acquiring an `interface{}` at any depth in a map
 
-The choice of `int64` and `float64` data types is for performance reasons and ensuring same-behavior.
+The casting logic has custom behavior to deal with data types common to other, more dynamic, languages.  This gives it great utility with minimal modification external to go.  For example any non-zero number, unidentifiable type, or non-empty string without explicit "false", "nil", "null", or "0" value is inferred as true.  Similarly, converts numbers to strings sanely and vice-versa.
 
-The translation of `bool` types is value when the data type is a boolean, but if converting from say a string or numeric value it implicitly assumes a truthy value (even if the value is `"false"` or `0` as a string or number).
+_There may be some strange behavior when casting from float32 to float64; not much I can do, review the IEEE-754, and avoid using float32 when using my library._
 
-The casting methods accept multiple string keys to traverse depth.
+Since this package leverages the json library, behavior should be identical.
 
-If data cannot be cast, or the value is not found an error is returned.
+_Attempts were made to leverage the `reflect` package, but the tradeoff in code was not beneficial.  Near equal lines, and deferrederror-trapping were needed, and there was no support for safely translating between types such as displaying a number as a string or accepting the string "true" as a truthy boolean value.  I may try again and put together a benchmark comparison._
 
-A fallback method can be supplied, so you can choose to deal with missing data or handle the error.
+The decision to use 64-bit types was both performance and precision based; it also seems to be the default for most packages.
 
-The `Merge()` method accepts N+1 maps sensibly combines data at different keys into a single `map[string]interface{}`.
+Latest iteration comes complete with table-drive tests to completely validate behavior, as well as benchmarks:
 
-It supports embedded `map[string]interface{}` data, such as objects within objects.
-
-Conflicting results defer to the last map supplied.
+    BenchmarkCastBool-8     30000000            57.9 ns/op
+    BenchmarkCastString-8   10000000           124 ns/op
+    BenchmarkCastInt-8      20000000            67.1 ns/op
+    BenchmarkCastFloat-8    20000000            66.4 ns/op
 
 
 ## intended purpose
@@ -51,12 +58,12 @@ Merge example:
 		//this will be true
 	}
 
-Merge and cast into a given struct:
+Casting can also implicitly perform merges, it accepts a reference to a struct plus one or more maps:
 
     var data CustomStruct
     maps.To(&data, config, flags)
 
-Casting example:
+Casting accepts the map, a fallback or "default" value, and one or more keys (more keys is interpretted as nested map depth):
 
     m := make(map[string]interface{})
     m["boolExample"] = true
@@ -65,3 +72,4 @@ Casting example:
         // handle or ignore error
     }
 
+_You can choose to ignore the returned error when supplying a sane-default for the "fallback" value._
